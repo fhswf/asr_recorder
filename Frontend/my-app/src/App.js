@@ -1,13 +1,13 @@
 import './App.css';
 import React from 'react';
-import Recorder from './Recorder';
+import { RecorderWithAuthencation } from './Auth0Components';
 import { BrowserRouter, Route } from 'react-router-dom';
 
 function App() 
 {
   return (
     <BrowserRouter basename="/asrRecorder">
-      <Route path="/index" component={Recorder} />
+        <Route path="/index" component={RecorderWithAuthencation} />
     </BrowserRouter>
   )
 }

@@ -1,6 +1,5 @@
 import './App.css';
 import React from 'react';
-//import ReactDOM from 'react-dom';
 import { ReactMediaRecorder } from "react-media-recorder"
 
 class Recorder extends React.Component
@@ -68,14 +67,13 @@ class Recorder extends React.Component
     {
       filename: 'audioTest',
       extesion: 'wav',
-      author: 'unknown',
+      author: this.props.user,
       text: 'dies ist der text'
     };
 
     const formData = new FormData();
     formData.append('metadataAudio', JSON.stringify(metadataAudio));
     formData.append('file', blob);
-
 
     // Fetch ans Backend senden
     let payload = 
@@ -97,8 +95,8 @@ class Recorder extends React.Component
 
   render()
   {
-    const history = this.state.history;
-  
+    const history = this.state.history; 
+
     const records = history.map
     ((item, index) => 
       {
@@ -119,7 +117,7 @@ class Recorder extends React.Component
       <div>
         <p><button onClick={() => this.performPost()}>test Post</button></p>
         <form onSubmit={this.handleSubmit}>
-          <input type="submit" value="Test submit"/>
+          <input type="submit" disabled={history.length === 0} value="Audio speichern"/>
         </form>
       </div>
       <ReactMediaRecorder
@@ -145,40 +143,3 @@ class Recorder extends React.Component
 }
 
 export default Recorder;
-
-
-    // var requestOptions = 
-    // {
-    //   method: 'POST',
-    //   headers: myHeaders,
-    //   body: urlencoded,
-    //   redirect: 'follow',
-    // };
-
-    // fetch("http://localhost:9000/bar", requestOptions)
-    //   .then((response) => response.json())
-    //   .then((responseData) => this.setState({ apiResponse: responseData.bar}))
-    //   .catch((error) => this.setState({ apiResponse: error.error}));
-
-      // this.setState({history: []});
-      // window.location.reload();
-      // this.setState({ apiResponse: "submitted audio records" });
-  
-
-    // handleSubmit = async e => {
-    //   e.preventDefault();
-    //   var urlencoded = new URLSearchParams();
-    //   urlencoded.append("foo", "this was the submit");
-  
-    //   const response = await fetch('http://localhost:9000/bar', {
-    //     method: 'POST',
-    //     headers: {
-  
-    //       'Content-Type': "application/x-www-form-urlencoded",
-    //     },
-    //     body: urlencoded,
-    //   });
-    //   const body = await JSON.stringify(response);
-  
-    //   this.setState({ apiResponse: body.bar });
-    // };

@@ -3,11 +3,7 @@ const bodyParser = require('body-parser');
 const upload = require('multer')();
 const cors = require('cors'); //TODO: Currently not working (no reaction at post)
 const fs = require('fs'); //for testing purposes
-const conn = require('./audioRecordsDbConnection');
-// const mongoClient = require('mongodb').MongoClient;
-// const urlMongoDb = "mongodb://localhost:27017/audioRecords"
-// const dbName = "audioRecords";
-// const collectionName = "audioRecordsCollection"
+const conn = require('./audioRecordsDbConnection'); //Also Creates Mongo-DB-Collection
 
 const port = 9000;
 
@@ -24,28 +20,8 @@ app.listen(port, () =>
     }
 );
 
-//create database
-
-// mongoClient.connect(urlMongoDb, function(err, db)
-//   {
-//     if (err)
-//     {
-//         console.log(err);
-//     }
-//     console.log("Database created!");
-//     //create collection (table)
-//     var dbo = db.db(dbName);
-//     dbo.createCollection(collectionName, function(err, res)
-//     {
-//         if (err) console.log(err);
-//         console.log("Collection created!");
-//         db.close();
-//     });
-//   });
-
 // Route definieren
-//TODO: brauch man router? let router = express.Router({mergeParams: true});
-app.post('/asrRecorder/uploadAudio', upload.single('file'),(req, res, next) => 
+app.post('/asrRecorder/uploadAudio', upload.single('file'),async (req, res, next) => 
   {
     console.log(req,req.body);
     // Optionale JSON Daten auslesen
@@ -66,20 +42,6 @@ app.post('/asrRecorder/uploadAudio', upload.single('file'),(req, res, next) =>
     let dataForDbEntry = {...metadataAudio, ...myFile};
     console.log(dataForDbEntry);
     conn.writeEntry(dataForDbEntry);
-    // write received meta-Informations in MongoDB (for testing)
-
-    // mongoClient.connect(urlMongoDb, function(err, db) 
-    // {
-    //   if (err) throw err;
-    //   var dbo = db.db(dbName);
-
-    //   dbo.collection(collectionName).insertOne(dataForDbEntry, function(err, res) 
-    //   {
-    //     if (err) throw err;
-    //     console.log("file inserted");
-    //     db.close();
-    //   });
-    // })
 
     res.json(req.body.zuSendeneFormulardaten);
 
@@ -119,3 +81,9 @@ app.post('/asrRecorder/uploadAudio', upload.single('file'),(req, res, next) =>
 // )
 
 // ExpressJS Einstellungen
+
+//import {removePausesAndAddPadding,toBuffer,toWav, SILENCE_LEVEL} from './removeSilence'
+    //get file without silent passages
+    // const output = await removePausesAndAddPadding(myFile, SILENCE_LEVEL)
+    // const outputBuffer = toBuffer(toWav(output));
+    // myFile.buffer = outputBuffer;
