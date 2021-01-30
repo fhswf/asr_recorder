@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const upload = require('multer')();
+const upload = require('multer')(); // Multer middleware importieren
 const cors = require('cors'); //TODO: Currently not working (no reaction at post)
 const fs = require('fs'); //for testing purposes
 const conn = require('./audioRecordsDbConnection'); //Also Creates Mongo-DB-Collection
@@ -11,8 +11,7 @@ const app = express({mergeParams: true});
 
 app.use(bodyParser.json());
 app.use(express.urlencoded({extended: true}));
-//app.use(cors); //TODO: Currently not working (no reaction at post)
-// Multer middleware importieren
+//app.use(cors()); //TODO: Currently not working (no reaction at post)
 
 app.listen(port, () => 
     {
@@ -20,10 +19,21 @@ app.listen(port, () =>
     }
 );
 
+//Attempt to send response from backend to frontend
+// app.use((req, res, next) =>
+// {
+//   res.header("Access-Control-Allow-Origin","*");
+//   res.header("Access-Control-Allow-Headers", "*");
+//   // console.log("Request Method: " + req.method)
+//   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+//   next();
+// })
+app.options('*', cors()) 
+
 // Route definieren
-app.post('/asrRecorder/uploadAudio', upload.single('file'),async (req, res, next) => 
+app.post('/asrRecorder/uploadAudio', upload.single('file'), async (req, res, next) => 
   {
-    console.log(req,req.body);
+    //console.log(req,req.body);
     // Optionale JSON Daten auslesen
     let metadataAudio = JSON.parse(req.body.metadataAudio);
     // Blob Datei auslesen
@@ -41,11 +51,18 @@ app.post('/asrRecorder/uploadAudio', upload.single('file'),async (req, res, next
     //Merge metadata for audiofile and audiofile itself
     let dataForDbEntry = {...metadataAudio, ...myFile};
     console.log(dataForDbEntry);
-    conn.writeEntry(dataForDbEntry);
+    conn.writeEntryAudio(dataForDbEntry);
 
-    res.json(req.body.zuSendeneFormulardaten);
-
+    // res.setHeader('Access-Control-Allow-Origin', '*');
+    res.json(req.body.metadataAudio);
+    res.send();
+    console.log("End of post reached!")
   });
+
+  //TODO: get/Post method for reading textes
+  
+  //TODO: Post method for writing textes in database
+
 
 // const express = require("express")
 // const bodyParser = require('body-parser')

@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
-import Recorder from "./Recorder"
+import Recorder from "./Recorder";
+
 
 const LoginButton = () =>
 {
@@ -27,15 +28,9 @@ const LoginToggleButton = () =>
   return(!isAuthenticated ? <LoginButton/> : <LogoutButton/>)
 }
 
-//TODO
-
 const Profile = () => 
 {
-  const { user, isAuthenticated, isLoading } = useAuth0();
-
-  if (isLoading) {
-    return <div>Loading ...</div>;
-  }
+  const { user, isAuthenticated} = useAuth0();
 
   return (
     isAuthenticated && (
@@ -48,12 +43,31 @@ const Profile = () =>
   );
 };
 
-const RecorderWithAuthencation = () =>
+function RecorderWithAuthencation()
 {
   const { user, isAuthenticated, isLoading } = useAuth0(); 
+  const [accepted, setAccepted] = useState(false); //0 = no answer yet; 1 = not accepted; 2 = accepted
+  
   let recorder = isAuthenticated && <Recorder user={user.name}/>
-  if (isLoading) {
+  
+  //show loading screen
+  if (isLoading) 
+  {
     return <div>Loading ...</div>;
+  }
+  //open dialog for letter of acceptance
+  if (isAuthenticated && !accepted)
+  {
+      return(
+      <div>
+        <p><LoginToggleButton/></p>
+        <p>
+          Hiermit akzeptiere ich, dass sprachliche Aufzeichnungen von mir sowie die dazugehörigen Kontodaten <br/>
+          für wissenschaftliche Zwecke von der Fachhochschule Südwestfalen gespeichert und verwendet werden dürfen.
+        </p>
+        <button onClick={() => setAccepted(true)}>Akzeptieren</button>
+      </div>
+      )
   }
   return (
     <div>

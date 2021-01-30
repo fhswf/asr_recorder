@@ -27,40 +27,18 @@ class Recorder extends React.Component
       });
   }
 
-  performPost()
-  {
-    var myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
-
-    var urlencoded = new URLSearchParams();
-    urlencoded.append("foo", "Performed post test");
-
-    var requestOptions = 
-    {
-      method: 'POST',
-      headers: myHeaders,
-      body: urlencoded,
-      redirect: 'follow',
-    };
-
-    fetch("http://localhost:9000/bar", requestOptions)
-      .then((response) => response.json())
-      .then((responseData) => 
-        {
-          alert(responseData.bar);
-          this.setState({ apiResponse: responseData.bar});
-        })
-      .catch(error => alert(error + " Error Test alert"));
-  }
-
   async handleSubmit(event)
   {
     event.preventDefault();
 
+    //to avoid sending an empty audio file to backend
+    if (this.state.history.length === 0)
+    {
+      return;
+    }
+
     var blob = new Blob(); 
     blob = await fetch(this.state.history[0]).then(r => r.blob())
-
-    //TODO: Prüfung, ob this.state.history nicht leer
 
     // Form-Data definieren
     let metadataAudio = 
@@ -81,16 +59,29 @@ class Recorder extends React.Component
       method: 'POST',
       mode: 'cors',
       credentials: 'include',
-      headers: {}, // WICHTIG!!! Die Header müssen für den File-Upload leer gelassen werden. Ansonsten wird eine Boundry benötigt
+      headers: {
+        // 'Content-Type': 'undefined'
+        //'x-Trigger': 'CORS'
+        //'Content-Type': 'application/json'
+      }, // WICHTIG!!! Die Header müssen für den File-Upload leer gelassen werden. Ansonsten wird eine Boundry benötigt
       redicrect: 'follow',
       referrerPolicy: 'no-referrer',
       body: formData
     };
   
+    //TODO: Server status abfragen (bzw. anwendung)
+
     fetch('http://localhost:9000/asrRecorder/uploadAudio', payload)
     .then(response => response.json())
-    .then((responseData) => alert(responseData.bar + " response"))
-    .catch(err => {alert(err)});
+    .then((responseData) => alert(responseData + " response"))
+    .catch(err => alert(err));
+
+    //TODO: Delete only if data was sent successfully to backend --> Response auswerten
+    this.setState
+    ({
+        history: [],
+    });
+
   }
 
   render()
@@ -111,11 +102,10 @@ class Recorder extends React.Component
 
   return (
     <div>
-      <div> 
+      {/* <div> 
          <p>{this.state.apiResponse}</p>
-      </div>
+      </div> */}
       <div>
-        <p><button onClick={() => this.performPost()}>test Post</button></p>
         <form onSubmit={this.handleSubmit}>
           <input type="submit" disabled={history.length === 0} value="Audio speichern"/>
         </form>
