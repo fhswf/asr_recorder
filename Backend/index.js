@@ -6,34 +6,27 @@ const fs = require('fs'); //for testing purposes
 const conn = require('./audioRecordsDbConnection'); //Also Creates Mongo-DB-Collection
 
 const port = 9000;
-
 const app = express({mergeParams: true});
 
 app.use(bodyParser.json());
 app.use(express.urlencoded({extended: true}));
-//app.use(cors()); //TODO: Currently not working (no reaction at post)
+app.use(cors()) 
 
-app.listen(port, () => 
+// enable Cors for origins
+app.options('/asrRecorder/getTextes',cors())
+app.options('/asrRecorder/uploadAudio',cors())
+
+app.get('/asrRecorder/getTextes',cors(), async (req, res, next) => 
+{
+    conn.readAllTextEntries((textesArray) =>
     {
-        console.log('Running http://localhost:9000')
-    }
-);
+        console.log(textesArray);
+        res.json({"textes": textesArray});
+    })
+});
 
-//Attempt to send response from backend to frontend
-// app.use((req, res, next) =>
-// {
-//   res.header("Access-Control-Allow-Origin","*");
-//   res.header("Access-Control-Allow-Headers", "*");
-//   // console.log("Request Method: " + req.method)
-//   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-//   next();
-// })
-app.options('*', cors()) 
-
-// Route definieren
-app.post('/asrRecorder/uploadAudio', upload.single('file'), async (req, res, next) => 
+app.post('/asrRecorder/uploadAudio',cors(), upload.single('file'), async (req, res, next) => 
   {
-    //console.log(req,req.body);
     // Optionale JSON Daten auslesen
     let metadataAudio = JSON.parse(req.body.metadataAudio);
     // Blob Datei auslesen
@@ -52,50 +45,14 @@ app.post('/asrRecorder/uploadAudio', upload.single('file'), async (req, res, nex
     let dataForDbEntry = {...metadataAudio, ...myFile};
     console.log(dataForDbEntry);
     conn.writeEntryAudio(dataForDbEntry);
-
-    // res.setHeader('Access-Control-Allow-Origin', '*');
     res.json(req.body.metadataAudio);
-    res.send();
-    console.log("End of post reached!")
   });
 
-  //TODO: get/Post method for reading textes
-  
-  //TODO: Post method for writing textes in database
-
-
-// const express = require("express")
-// const bodyParser = require('body-parser')
-// const cors = require('cors')
-// const app = express()
-
-// const port = 9000;
-
-// //necessary for getting the response of the sent post request from frontend (from browser)
-// app.use(cors())
-
-// app.listen(port, () => 
-//     {
-//         console.log('Beispiel http://localhost:${port}')
-//     }
-// );
-
-// app.use(bodyParser.json());
-// //for accessing POST-Arguments more easily
-// app.use(express.urlencoded(
-//     {
-//         extended: true
-//     }
-// ));
-
-
-// app.post('/bar', function(req, res)
-//     {
-//         console.log(req,req.body);
-//         res.setHeader("ContentType", "application/json");
-//         res.json({"bar" : req.body.foo});
-//     }
-// )
+  app.listen(port, () => 
+    {
+        console.log('Running http://localhost:9000')
+    }
+);
 
 // ExpressJS Einstellungen
 

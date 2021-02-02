@@ -46,7 +46,7 @@ const Profile = () =>
 function RecorderWithAuthencation()
 {
   const { user, isAuthenticated, isLoading } = useAuth0(); 
-  const [accepted, setAccepted] = useState(false); //0 = no answer yet; 1 = not accepted; 2 = accepted
+  const [accepted, setAccepted] = useState(false);
   
   let recorder = isAuthenticated && <Recorder user={user.name}/>
   
@@ -61,6 +61,7 @@ function RecorderWithAuthencation()
       return(
       <div>
         <p><LoginToggleButton/></p>
+        <h3>Einverständniserklärung</h3>
         <p>
           Hiermit akzeptiere ich, dass sprachliche Aufzeichnungen von mir sowie die dazugehörigen Kontodaten <br/>
           für wissenschaftliche Zwecke von der Fachhochschule Südwestfalen gespeichert und verwendet werden dürfen.
