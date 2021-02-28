@@ -1,0 +1,21 @@
+button, input, audio, p
+{
+    font-size: 120%; 
+    vertical-align: middle;
+}
+
+#text
+{
+    font-size: 300%;
+    font-family: "Times New Roman", Times, serif;
+    font-weight: bold;
+}
+
+#buttonRecording
+{
+    border-radius: 50%;
+    width: 100px;
+    height: 100px;
+
+}
+
