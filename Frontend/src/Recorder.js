@@ -1,9 +1,16 @@
-import './App.css';
+import './Recorder.css';
 import React from 'react';
 import { ReactMediaRecorder } from "react-media-recorder";
+import env from "react-dotenv";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faMicrophoneAlt } from '@fortawesome/free-solid-svg-icons'
+import { faStop } from '@fortawesome/free-solid-svg-icons'
 
+//React-Component-Class for audiorecorder functionallities and views
 class Recorder extends React.Component
 {
+  //Initiates attributes in this.state, gets textes from database, binds saveRecord-function
+  //Parameter props: here: for receiving the "user"-html-tag-attribute
   constructor(props)
   {
     super(props);
@@ -13,27 +20,36 @@ class Recorder extends React.Component
       textes: [],
       selectedText: "",
     }
-    this.fillTextesSelection();
-
-    this.handleSubmit = this.handleSubmit.bind(this);
+    this.getTextes(); 
+    this.saveRecord = this.saveRecord.bind(this);
   }
 
-  fillTextesSelection()
+  //Sending get-request to backend for saving textes in "textes"-array-attribute
+  getTextes()
   {
-    fetch('http://localhost:9000/asrRecorder/getTextes')
+    fetch(env.GET_TEXTES_URI)
       .then(r => r.json())
       .then(rData => 
         {
           this.setState
           ({
             textes: rData.textes,
-            selectedText: rData.textes[0],
           });
+          this.selectRandomText();
         })
       .catch(err => alert(err));
   }
 
-  async handleSubmit(event)
+  //Selects randomly a text from the "textes"-Attribute and saves it in "selectedText"-Attribute
+  selectRandomText()
+  {
+    const textes = this.state.textes; 
+    this.setState({selectedText: textes[Math.floor(Math.random() * textes.length)]});
+    this.setState({currentAudioUrl: null});
+  }
+
+  //Submit-function for sending audiodata via http-post to backend
+  async saveRecord(event)
   {
     event.preventDefault();
 
@@ -47,7 +63,7 @@ class Recorder extends React.Component
     blob = await fetch(this.state.currentAudioUrl).then(r => r.blob())
 
     const timestamp = new Date();
-    // Form-Data definieren
+    // Define Form data
     let metadataAudio = 
     {
       filename: timestamp.toISOString(),
@@ -60,7 +76,7 @@ class Recorder extends React.Component
     formData.append('metadataAudio', JSON.stringify(metadataAudio));
     formData.append('file', blob);
 
-    // Fetch ans Backend senden
+    // Send fetch to backend
     let payload = 
     {
       method: 'POST',
@@ -71,7 +87,7 @@ class Recorder extends React.Component
       body: formData
     };
 
-    fetch('http://localhost:9000/asrRecorder/uploadAudio', payload)
+    fetch(env.UPLOAD_AUDIO_FILE_URI, payload)
     .then(response => response.json())
     .then((responseData) => 
     {
@@ -80,46 +96,49 @@ class Recorder extends React.Component
       ({
           currentAudioUrl: null,
       });
+      this.selectRandomText();
     })
     .catch(err => alert(err));
   }
 
+  //render elements for the audiorecorder
   render()
   {
-  const textes = this.state.textes; 
   const audioPlayer = !(this.state.currentAudioUrl === null) && <audio src={this.state.currentAudioUrl} controls autoplay />;
+  const buttonSave = !(this.state.currentAudioUrl === null) && <input type="submit" value="speichern"/>
+  const buttonDelete = !(this.state.currentAudioUrl === null) && 
+    <button onClick={() => this.setState({currentAudioUrl: null})} >löschen</button>
 
   return (
     <div>
       <div>
-        <label for="textes">Wählen sie einen Text zum Vorsprechen aus:</label><br/>
-        <select name="textes" id="textes" onChange={(e) => this.setState({selectedText: e.target.value})}>
-          {textes.map((option) => (
-              <option value={option}>{option}</option>
-            ))}
-        </select>
+        <p>Bitte lesen sie den folgenden Text nach Start der Aufnahme vor: </p>
+        <p id="text">{this.state.selectedText}</p>
+        <button onClick={() => this.selectRandomText()}>Text wechseln</button>
       </div>
       <br/>
-      <div>
-        <form onSubmit={this.handleSubmit}>
-          <input type="submit" disabled={this.state.currentAudioUrl === null} value="Audio speichern"/>
-        </form>
-      </div>
       <ReactMediaRecorder
         audio
         onStop={(url) => this.setState({currentAudioUrl: url})}
         render={({ status, startRecording, stopRecording}) => (
           <div>
             <div>
-              <p>{status}</p>
-              <button onClick={status !== "recording" ? startRecording : stopRecording}>{status !== "recording" ? "Start Aufnahme" : "Aufnahme beenden"}</button>
+              <p>{status !== "recording" ? "Aufnahme starten" : "Sprachnachricht wird aufgezeichnet ..."}</p>
+          	  <button id="buttonRecording" disabled={this.state.currentAudioUrl !== null} onClick={status !== "recording" ? startRecording : stopRecording}>
+                {status !== "recording" ? <FontAwesomeIcon  size="2x" icon={faMicrophoneAlt} /> : <FontAwesomeIcon size="1x" icon={faStop} />}
+              </button>
             </div>
           </div>
         )}
       />
+      <br/>
       <div>
-        {audioPlayer}
-      </div>
+        <form onSubmit={this.saveRecord}>
+          {audioPlayer}
+          {buttonSave}
+          {buttonDelete}
+        </form>
+      </div> 
     </div>
   );
   }

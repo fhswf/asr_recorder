@@ -2,7 +2,7 @@ version: "3"
 
 services:
   app:
-    container_name: bookme
+    container_name: voicecollector
     restart: always
     build: .
     env_file:
@@ -10,10 +10,10 @@ services:
     ports:
       - "127.0.0.1:47001:5000"
     links:
-      - mongo-bookme
+      - mongo-audioRecords
 
   mongo-bookme:
-    container_name: mongo-bookme
+    container_name: mongo-audioRecords
     image: mongo
     volumes:
-      - /opt/bookme/mongo:/data/db
+      - mongodb://localhost:27017/audioRecords

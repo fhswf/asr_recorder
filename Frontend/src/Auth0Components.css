@@ -1,7 +1,69 @@
+button, input, audio, p
+{
+    font-size: 120%; 
+    vertical-align: middle;
+}
+
+#title
+{
+    font-size: 500%;
+    position: absolute;
+    text-align: center;
+    left: 50%;
+    top: 10px;
+    transform: translate(-50%, -50%);
+}
+
+#login
+{
+    background-color: gainsboro;
+    position: absolute;
+    text-align: center;
+    left: 50%;
+    top: 60%;
+    transform: translate(-50%, -50%);
+}
+
+#logoutButton
+{
+    font-size: 150%; 
+}
+
+#profile
+{
+    position: absolute;
+    text-align: right;
+    vertical-align: top;
+    right: 0px;
+    top: 0px;
+}
+
 #recorder
 {
     background-color: gainsboro;
     position: absolute;
-    left: 40%;
-    top: 40%;
+    text-align: center;
+    left: 50%;
+    top: 60%;
+    transform: translate(-50%, -50%);
 }
+
+#loading
+{
+    font-size: 150%; 
+    position:absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#letterOfAcceptance
+{
+    background-color: gainsboro;
+    position: absolute;
+    text-align: center;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+

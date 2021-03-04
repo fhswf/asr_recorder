@@ -1,22 +1,18 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const upload = require('multer')(); // Multer middleware importieren
-const cors = require('cors'); //TODO: Currently not working (no reaction at post)
-const fs = require('fs'); //for testing purposes
+const cors = require('cors');
 const conn = require('./audioRecordsDbConnection'); //Also Creates Mongo-DB-Collection
+require('dotenv').config();
 
-const port = 9000;
-const app = express({mergeParams: true});
+const port = process.env.PORT;
+const app = express();
 
 app.use(bodyParser.json());
 app.use(express.urlencoded({extended: true}));
-app.use(cors()) 
 
-// enable Cors for origins
-app.options('/asrRecorder/getTextes',cors())
-app.options('/asrRecorder/uploadAudio',cors())
-
-app.get('/asrRecorder/getTextes',cors(), async (req, res, next) => 
+//http-Get restful-Interface for getting an array of textes in json from the MongoDB
+app.get(process.env.ROOTPATH + 'getTextes',cors(), async (req, res, next) => 
 {
     conn.readAllTextEntries((textesArray) =>
     {
@@ -25,39 +21,23 @@ app.get('/asrRecorder/getTextes',cors(), async (req, res, next) =>
     })
 });
 
-app.post('/asrRecorder/uploadAudio',cors(), upload.single('file'), async (req, res, next) => 
+//http-post restful-inteface for saving one Audio file in the MongoDB as json
+app.post(process.env.ROOTPATH + 'uploadAudio',cors(), upload.single('file'), async (req, res, next) => 
   {
-    // Optionale JSON Daten auslesen
+    // Read Metadata
     let metadataAudio = JSON.parse(req.body.metadataAudio);
-    // Blob Datei auslesen
+    // Read Blob-File data
     let myFile = req.file;
-    // write file in file-System for testing purposes
-    fs.writeFile("./tmp/test.wav", myFile.buffer, function(err) 
-    {
-      if(err) 
-      {
-          return console.log(err);
-      }
-      console.log("The file was saved!");
-    }); 
-    
     //Merge metadata for audiofile and audiofile itself
     let dataForDbEntry = {...metadataAudio, ...myFile};
-    console.log(dataForDbEntry);
+    //Write entry in Database
     conn.writeEntryAudio(dataForDbEntry);
-    res.json(req.body.metadataAudio);
+    //send response as confirmation
+    res.json({status: "OK"});
   });
 
   app.listen(port, () => 
     {
-        console.log('Running http://localhost:9000')
+        console.log('Server is running')
     }
 );
-
-// ExpressJS Einstellungen
-
-//import {removePausesAndAddPadding,toBuffer,toWav, SILENCE_LEVEL} from './removeSilence'
-    //get file without silent passages
-    // const output = await removePausesAndAddPadding(myFile, SILENCE_LEVEL)
-    // const outputBuffer = toBuffer(toWav(output));
-    // myFile.buffer = outputBuffer;
